@@ -6,16 +6,17 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly', 'https://www.googleapis.com/auth/calendar.events']
 
-# The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = '1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA'
-SAMPLE_RANGE_NAME = 'Sheet1!A24:G24'
+# The ID and range of a spreadsheet.
+SPREADSHEET_ID = '1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA'
+RANGE_NAME = 'Sheet1!A24:G24'
+
+# The ID of a calendar event
+EVENT_ID = '049ssfrp40nl7p8b14ri9j59mr'
 
 def main():
-    """Shows basic usage of the Sheets API.
-    Prints values from a sample spreadsheet.
-    """
+
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -39,17 +40,25 @@ def main():
 
     # Call the Sheets API
     sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                                range=SAMPLE_RANGE_NAME).execute()
+    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
+                                range=RANGE_NAME).execute()
     values = result.get('values', [])
 
+    # Retrieve event from caendar api
+    cService = build('calendar', 'v3', credentials=creds)
+    event = cService.events().get(calendarId='primary', eventId=EVENT_ID).execute()
+
     if not values:
-        print('No data found.')
+        agenda = 'No scheduled updates this week.'
     else:
-        print('Name, Major:')
+        agenda = '%s\n' % values[0][0]
         for row in values:
             # Print columns A and E, which correspond to indices 0 and 4.
-            print('%s, %s' % (row[1], row[2]))
+            agenda = agenda + '%s - %s\n%s - %s\n%s - %s'  % (row[1], row[2], row[3], row[4], row[5], row[6])
+
+        event['description'] = agenda
+        updated_event = cService.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
 
 if __name__ == '__main__':
     main()
