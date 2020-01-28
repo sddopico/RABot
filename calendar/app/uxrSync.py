@@ -6,16 +6,18 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly', 'https://www.googleapis.com/auth/calendar.events']
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly',
+                'https://www.googleapis.com/auth/calendar.events']
 
 # The ID and range of a spreadsheet.
 SPREADSHEET_ID = '1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA'
 RANGE_NAME = 'Sheet1!A24:G24'
 
 # The ID of a calendar event
-EVENT_ID = '049ssfrp40nl7p8b14ri9j59mr'
+EVENT_ID = '3ulsoahn7qjmkhotcd1h4pbi0l_20200128T180000Z'
 
 creds = None
+
 
 def getCreds():
     global creds
@@ -39,49 +41,48 @@ def getCreds():
             pickle.dump(creds, token)
     return creds
 
-def request(method, service, version):
 
+def request(method, service, version):
     # Calls googleapi and
     # Accepts 'method, ''service', 'version'
     # Returns [request resource]
-
     global creds
-
     s = build(service, version, credentials=creds)
     sheet = s.spreadsheets()
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                range=RANGE_NAME).execute()
-
+                            range=RANGE_NAME).execute()
     return result
 
-def main():
 
+def main():
     global creds
     creds = getCreds()
 
     # Call the Sheets API
-
     result = request('get', 'sheets', 'v4')
     values = result.get('values', [])
 
-    # Retrieve event from calendar api
-    #cService = build('calendar', 'v3', credentials=creds)
-    #event = cService.events()
-    #eResult = event.get(calendarId='primary',
-    #                    eventId=EVENT_ID).execute()
+    #Retrieve event from calendar api
+    cService = build('calendar', 'v3', credentials=creds)
+    event = cService.events().get(calendarId='primary', eventId=EVENT_ID).execute()
+
+    agenda = 'Sign-up to share <a href="https://docs.google.com/spreadsheets/d/1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA/edit#gid=0">here</a>\n\n<b>Agenda:</b><ul><li>Review Backlog(5 minutes)</li><li>Share progress on projects (add your name for 10-minute updates):</li><ul>'
 
     if not values:
-        agenda = 'No scheduled updates this week.'
+        agenda = agenda + '\n\nNo scheduled updates this week.'
     else:
-        agenda = '%s\n' % values[0][0]
         for row in values:
-            # Print columns A and E, which correspond to indices 0 and 4.
-            agenda = agenda + '%s - %s\n%s - %s\n%s - %s'  % (row[1], row[2], row[3], row[4], row[5], row[6])
-
-        #event['description'] = agenda
-        '''updated_event = event.update(calendarId='primary',
-                                    eventId=event['id'],
-                                    body=event).execute()'''
+            #print(values)
+            i = 0
+            for value in row[1:]:
+                if i%2 == 0:
+                    agenda = agenda + '<li>' + value + ' | '
+                else:
+                    agenda = agenda + value + '</li>'
+                i+=1
+        agenda = agenda + '</ul><li>' + 'Discuss cool new ideas, tactics, research methods, etc. (15 minutes)</li>'
+        event['description'] = agenda
+        updated_event = cService.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
         print(agenda)
 
 if __name__ == '__main__':
