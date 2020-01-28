@@ -14,7 +14,9 @@ SPREADSHEET_ID = '1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA'
 RANGE_NAME = 'Sheet1!A24:G24'
 
 # The ID of a calendar event
-EVENT_ID = '3ulsoahn7qjmkhotcd1h4pbi0l_20200128T180000Z'
+EVENT_ID = '3145rdbvv06fvm34lfh1k91pp9_20200128T180000Z'
+
+CAL_ID = 'appfolio.com_1kjl9ecihbs8v8nmitoqn6esqc@group.calendar.google.com'
 
 creds = None
 
@@ -64,7 +66,7 @@ def main():
 
     #Retrieve event from calendar api
     cService = build('calendar', 'v3', credentials=creds)
-    event = cService.events().get(calendarId='primary', eventId=EVENT_ID).execute()
+    event = cService.events().get(calendarId=CAL_ID, eventId=EVENT_ID).execute()
 
     agenda = 'Sign-up to share <a href="https://docs.google.com/spreadsheets/d/1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA/edit#gid=0">here</a>\n\n<b>Agenda:</b><ul><li>Review Backlog(5 minutes)</li><li>Share progress on projects (add your name for 10-minute updates):</li><ul>'
 
@@ -72,7 +74,6 @@ def main():
         agenda = agenda + '\n\nNo scheduled updates this week.'
     else:
         for row in values:
-            #print(values)
             i = 0
             for value in row[1:]:
                 if i%2 == 0:
@@ -82,7 +83,7 @@ def main():
                 i+=1
         agenda = agenda + '</ul><li>' + 'Discuss cool new ideas, tactics, research methods, etc. (15 minutes)</li>'
         event['description'] = agenda
-        updated_event = cService.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+        updated_event = cService.events().update(calendarId=CAL_ID, eventId=event['id'], body=event).execute()
         print(agenda)
 
 if __name__ == '__main__':
