@@ -11,10 +11,10 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly',
 
 # The ID and range of a spreadsheet.
 SPREADSHEET_ID = '1iBpk0sePz4MTP6Q9lGe6R3XvjUid3ynB8TWs0ka1xpA'
-RANGE_NAME = 'Sheet1!A25:G25'
+RANGE_NAME = 'Sheet1!A28:G28'
 
 # The ID of a calendar event
-EVENT_ID = '3145rdbvv06fvm34lfh1k91pp9_20200204T180000Z'
+EVENT_ID = '3145rdbvv06fvm34lfh1k91pp9_20200225T180000Z'
 
 CAL_ID = 'appfolio.com_1kjl9ecihbs8v8nmitoqn6esqc@group.calendar.google.com'
 
